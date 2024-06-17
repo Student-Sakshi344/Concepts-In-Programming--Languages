@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_DIGITS 130
+
+typedef struct {
+    int digits[MAX_DIGITS];
+    int sign;
+} BigInt;
+
+void initializeBigInt(BigInt *num) {
+    memset(num->digits, 0, sizeof(num->digits));
+    num->sign = 1;
+}
+
+void printBigInt(const BigInt *num) {
+    int i = MAX_DIGITS - 1;
+    while (i > 0 && num->digits[i] == 0) {
+        i--;
+    }
+
+    if (num->sign == -1) {
+        printf("-");
+    }
+
+    while (i >= 0) {
+        printf("%d", num->digits[i]);
+        i--;
+    }
+
+    printf("\n");
+}
+
+void addBigInt(const BigInt *a, const BigInt *b, BigInt *result) {
+    initializeBigInt(result);
+
+    int carry = 0;
+
+    for (int i = 0; i < MAX_DIGITS; i++) {
+        int sum = a->digits[i] + b->digits[i] + carry;
+        result->digits[i] = sum % 10;
+        carry = sum / 10;
+    }
+}
+
+void subtractBigInt(const BigInt *a, const BigInt *b, BigInt *result) {
+    initializeBigInt(result);
+
+    int borrow = 0;
+
+    for (int i = 0; i < MAX_DIGITS; i++) {
+        int diff = a->digits[i] - b->digits[i] - borrow;
+        if (diff < 0) {
+            diff += 10;
+            borrow = 1;
+        } else {
+            borrow = 0;
+        }
+        result->digits[i] = diff;
+    }
+}
+
+void multiplyBigInt(const BigInt *a, const BigInt *b, BigInt *result) {
+    initializeBigInt(result);
+
+    for (int i = 0; i < MAX_DIGITS; i++) {
+        for (int j = 0; j < MAX_DIGITS - i; j++) {
+            result->digits[i + j] += a->digits[i] * b->digits[j];
+            result->digits[i + j + 1] += result->digits[i + j] / 10;
+            result->digits[i + j] %= 10;
+        }
+    }
+}
+
+int main() {
+    BigInt num1, num2, sum, difference, product;
+
+    initializeBigInt(&num1);
+    initializeBigInt(&num2);
+
+    addBigInt(&num1, &num2, &sum);
+    subtractBigInt(&num1, &num2, &difference);
+    multiplyBigInt(&num1, &num2, &product);
+
+    printf("Sum: ");
+    printBigInt(&sum);
+
+    printf("Difference: ");
+    printBigInt(&difference);
+
+    printf("Product: ");
+    printBigInt(&product);
+
+    return 0;
+}
